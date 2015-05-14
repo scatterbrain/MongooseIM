@@ -52,6 +52,7 @@ start() ->
         RiakOpts ->
             {_, Workers} = lists:keyfind(workers, 1, RiakOpts),
             {_, PoolsSpec} = lists:keyfind(pools_spec, 1, RiakOpts),
+            create_riak_metrics(),
             mongoose_riak_sup:start(Workers, PoolsSpec)
     end.
 -spec stop() -> no_return().
@@ -156,7 +157,10 @@ update_map_op({Field, Fun}, Map) ->
 call_riak(F, ArgsIn) ->
     Worker = get_worker(),
     Args = [Worker | ArgsIn],
-    apply(riakc_pb_socket, F, Args).
+    update_call_metric(F),
+    {Time, R} = timer:tc(riakc_pb_socket, F, Args),
+    update_result_metric(F, R, Time),
+    R.
 
 pick_pool(undefined) ->
     undefined;
@@ -165,3 +169,29 @@ pick_pool(1) -> %% no need to draw a pool as there's only one
 pick_pool(Count) ->
     PoolId = erlang:phash2({os:timestamp(), self()}, Count) + 1,
     get_pool_name(PoolId).
+
+create_riak_metrics() ->
+    TrackedOps = [get, put, update_type, fetch_type, mapred, delete, list_keys],
+    [create_riak_metric(Op) || Op <- TrackedOps].
+
+call_metric(Op) ->
+    [backends, riak, Op, calls].
+
+timeouts_metric(Op) ->
+    [backends, riak, Op, timeouts].
+
+histogram_metric(Op) ->
+    [backends, riak, Op, times].
+
+create_riak_metric(Op) ->
+    mongoose_metrics:create(call_metric(Op), spiral),
+    mongoose_metrics:create(timeouts_metric(Op), spiral),
+    mongoose_metrics:create(histogram_metric(Op), histogram).
+
+update_call_metric(Op) ->
+    mongoose_metrics:update(call_metric(Op), 1).
+
+update_result_metric(Op, {error, timeout}, _) ->
+    mongoose_metrics:update(timeouts_metric(Op), 1);
+update_result_metric(Op, _, Time) ->
+    mongoose_metrics:update(histogram_metric(Op), Time).
