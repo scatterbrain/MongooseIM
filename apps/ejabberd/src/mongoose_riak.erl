@@ -33,6 +33,7 @@
 -export([get_worker/0]).
 -export([create_new_map/1]).
 -export([update_map/2]).
+-export([mapred/2]).
 
 -export([make_pool_name/1, get_pool_name/1]).
 
@@ -134,6 +135,11 @@ create_new_map(Ops) ->
 -spec update_map(riakc_map:crdt_map(), [riakc_map_op()]) -> riakc_map:crdt_map().
 update_map(Map, Ops) ->
     lists:foldl(fun update_map_op/2, Map, Ops).
+
+-spec mapred(mapred_inputs(), [mapred_queryterm()]) ->
+    {ok, mapred_result()} | {error, term()}.
+mapred(KeyFileters, MapRed) ->
+    ?CALL(mapred, [KeyFileters, MapRed]).
 
 -spec get_worker() -> pid() | undefined.
 get_worker() ->
