@@ -34,6 +34,7 @@
 -export([create_new_map/1]).
 -export([update_map/2]).
 -export([mapred/2]).
+-export([search/2]).
 
 -export([make_pool_name/1, get_pool_name/1]).
 
@@ -141,6 +142,9 @@ update_map(Map, Ops) ->
 mapred(KeyFileters, MapRed) ->
     ?CALL(mapred, [KeyFileters, MapRed]).
 
+search(Index, Query) ->
+    ?CALL(search, [Index, Query]).
+
 -spec get_worker() -> pid() | undefined.
 get_worker() ->
     Pool = pick_pool(mongoose_riak_sup:get_riak_pools_count()),
@@ -177,7 +181,7 @@ pick_pool(Count) ->
     get_pool_name(PoolId).
 
 create_riak_metrics() ->
-    TrackedOps = [get, put, update_type, fetch_type, mapred, delete, list_keys],
+    TrackedOps = [get, put, update_type, fetch_type, mapred, delete, list_keys, search],
     [create_riak_metric(Op) || Op <- TrackedOps].
 
 call_metric(Op) ->

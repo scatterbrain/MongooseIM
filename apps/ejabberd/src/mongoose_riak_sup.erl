@@ -51,8 +51,8 @@ start_link(Workers, PoolSpec) ->
 
 -spec stop() -> no_return().
 stop() ->
-    supervisor:terminate_child(ejabberd_sup, riak_pools_sup),
-    supervisor:delete_child(ejabberd_sup, riak_pools_sup).
+    supervisor:terminate_child(ejabberd_sup, mongoose_riak_sup),
+    supervisor:delete_child(ejabberd_sup, mongoose_riak_sup).
 
 -spec get_riak_pools_count() -> integer() | undefined.
 get_riak_pools_count() ->
