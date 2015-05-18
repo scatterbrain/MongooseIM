@@ -34,7 +34,7 @@
 -export([create_new_map/1]).
 -export([update_map/2]).
 -export([mapred/2]).
--export([search/2]).
+-export([search/2, search/3]).
 
 -export([make_pool_name/1, get_pool_name/1]).
 
@@ -143,7 +143,10 @@ mapred(KeyFileters, MapRed) ->
     ?CALL(mapred, [KeyFileters, MapRed]).
 
 search(Index, Query) ->
-    ?CALL(search, [Index, Query]).
+    search(Index, Query, []).
+
+search(Index, Query, Opts) ->
+    ?CALL(search, [Index, Query, Opts]).
 
 -spec get_worker() -> pid() | undefined.
 get_worker() ->
