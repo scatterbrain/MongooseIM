@@ -136,14 +136,14 @@ search_fields(_VHost) ->
 make_restriction_sql(LServer, Data) ->
     filter_fields(Data, "", LServer).
 
-filter_fields([], RestrictionSQL, _LServer) ->
-    case RestrictionSQL of
+filter_fields([], RestrictionSQLIn, LServer) ->
+    case RestrictionSQLIn of
 	"" ->
 	    "";
         <<>> ->
             <<>>;
 	_ ->
-	    [" where ", RestrictionSQL]
+	    [" where ", [RestrictionSQLIn, " and ", ["server = '", ejabberd_odbc:escape(LServer),"'"]]]
     end;
 filter_fields([{SVar, [Val]} | Ds], RestrictionSQL, LServer)
   when is_binary(Val) and (Val /= <<"">>) ->
