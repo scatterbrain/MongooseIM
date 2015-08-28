@@ -109,12 +109,17 @@ total_count() ->
 
 -spec unique_count() -> integer().
 unique_count() ->
-    compute_unique(mnesia:dirty_first(session),
-                   sets:new()).
+    case catch compute_unique(mnesia:dirty_first(session), sets:new()) of
+        {ok, Cnt} ->
+            Cnt;
+        _ ->
+            0 %% It's possible that in cluster some sessions will be removed while traversing the table.
+              %% Such situation will crash the compute_unique function.
+    end.
 
 -spec compute_unique(term(), ejabberd:set_t()) -> integer().
 compute_unique('$end_of_table', Set) ->
-    sets:size(Set);
+    {ok, sets:size(Set)};
 compute_unique(Key, Set) ->
     NewSet = case mnesia:dirty_read(session, Key) of
                  [Session] ->
