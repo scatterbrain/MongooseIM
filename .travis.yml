@@ -29,7 +29,7 @@ branches:
                 - master
 
 otp_release:
-        - R16B03
+        - 18.0
 env:
         - PRESET=internal_redis DB=mnesia REL_CONFIG=with-redis
         - PRESET=internal_mnesia DB=mnesia
@@ -43,6 +43,8 @@ env:
 matrix:
     include:
         - otp_release: R15B03
+          env: PRESET=internal_mnesia DB=mnesia
+        - otp_release: R16B03
           env: PRESET=internal_mnesia DB=mnesia
         - otp_release: 17.4
           env: PRESET=internal_mnesia DB=mnesia
