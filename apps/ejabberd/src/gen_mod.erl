@@ -50,8 +50,8 @@
 
 -include("ejabberd.hrl").
 
--record(ejabberd_module, {module_host :: ejabberd:server(),
-                          opts :: list()
+-record(ejabberd_module, {module_host :: {atom(), ejabberd:server()},
+                          opts :: list() | atom() % atom() for match spec
                          }).
 
 %% -export([behaviour_info/1]).
@@ -118,7 +118,7 @@ start_backend_module(Module, Opts, TrackedFuncs) ->
     code:load_binary(Mod, BackendModuleStr ++ ".erl", Code),
     ensure_backend_metrics(Module, TrackedFuncs).
 
--spec backend_code(string(), atom(), list()) -> string().
+-spec backend_code(atom(), atom(), list()) -> {nonempty_string(), list()}.
 backend_code(Module, Backend, TrackedFuncs) when is_atom(Backend) ->
     Callbacks = Module:behaviour_info(callbacks),
     ModuleStr = atom_to_list(Module),
