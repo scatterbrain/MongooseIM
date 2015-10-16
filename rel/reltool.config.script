@@ -45,7 +45,8 @@ BaseAppsToInclude = AppsToRun ++
                      alarms,
                      idna,
                      recon,
-                     setup
+                     setup, 
+                     ejabberd_trace
                      ],
 
 
